@@ -85,6 +85,7 @@ export function MessageModal({ isOpen, onClose, request, currentUser }: MessageM
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col h-[400px]">
+          {/* @ts-expect-error UI套件型別衝突，暫時忽略 */}
           <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
             <div className="space-y-4 p-2">
               {messages.length === 0 && (

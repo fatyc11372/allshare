@@ -61,6 +61,7 @@ function dbItemToItem(row: any): Item {
       returnDate: row.borrowed_at
         ? new Date(new Date(row.borrowed_at).getTime() + 7 * 24 * 60 * 60 * 1000)
         : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      contactInfo: '未提供', // 這裡補上了 TypeScript 要求的 contactInfo
     } : undefined,
   };
 }
@@ -274,8 +275,6 @@ export default function App() {
   };
 
   const handleRequestAction = async (id: string, action: string) => {
-    //console.log('handleRequestAction called', id, action);
-
     // 1. 處理「標記已讀」
     if (action === 'mark_read') {
       await supabase.from('borrow_requests')
