@@ -7,13 +7,13 @@ import { Toaster } from './ui/sonner';
 import { toast } from 'sonner';
 
 interface AddItemModalProps {
-  open: boolean;
+  isOpen: boolean; // 👈 關鍵修正：改回 isOpen
   onClose: () => void;
   onItemAdd: (item: any) => void;
   currentUser: any;
 }
 
-export function AddItemModal({ open, onClose, onItemAdd, currentUser }: AddItemModalProps) {
+export function AddItemModal({ isOpen, onClose, onItemAdd, currentUser }: AddItemModalProps) { // 👈 關鍵修正：改回 isOpen
   const [formData, setFormData] = useState({
     title: '',
     category: '',
@@ -54,7 +54,7 @@ export function AddItemModal({ open, onClose, onItemAdd, currentUser }: AddItemM
   };
 
   return (
-    <Dialog open={open} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={onClose}> {/* 👈 這裡也對應改好囉 */}
       <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto p-0">
         <Toaster />
         <DialogHeader className="px-6 pt-6">
@@ -63,14 +63,14 @@ export function AddItemModal({ open, onClose, onItemAdd, currentUser }: AddItemM
 
         <form onSubmit={handleSubmit} className="px-6 py-5 space-y-6">
           
-          {/* 1. 圖片上傳與預覽區域：優化為不裁切模式 */}
+          {/* 圖片上傳與預覽區域 */}
           <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl aspect-[16/10] bg-muted/20 flex flex-col items-center justify-center relative overflow-hidden group">
             {formData.image ? (
               <>
                 <img
                   src={formData.image}
                   alt="Item preview"
-                  className="w-full h-full object-contain p-2" // 核心修改：將 object-cover 改為 object-contain，並加入 p-2
+                  className="w-full h-full object-contain p-2"
                 />
                 <Button
                   size="icon"
@@ -98,7 +98,7 @@ export function AddItemModal({ open, onClose, onItemAdd, currentUser }: AddItemM
             )}
           </div>
 
-          {/* 2. 表單內容區域 (省略，保持不變) */}
+          {/* 表單內容區域 */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-5">
             <div className="col-span-2">
               <Input
