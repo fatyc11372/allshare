@@ -4,26 +4,41 @@ import { Button } from './ui/button';
 import { Toaster } from './ui/sonner';
 import { MapPin, Clock3, Tag, Package, UserCircle, MessageSquareShare, X } from 'lucide-react';
 
+// 這裡把 App.tsx 傳過來的所有接頭暗號都補齊，TypeScript 就不會再報錯了！
 interface ItemDetailModalProps {
-  item: any; // 
+  item: any;
+  isOpen: boolean;
   onClose: () => void;
+  onBooking: (itemId: string, message: string) => Promise<void>;
+  currentUser: any;
+  onItemUpdated: () => Promise<void>;
   onLogin?: () => void;
   onAddItem?: () => void;
 }
 
-export function ItemDetailModal({ item, onClose, onLogin, onAddItem }: ItemDetailModalProps) {
+export function ItemDetailModal({ 
+  item, 
+  isOpen, 
+  onClose, 
+  onBooking, 
+  currentUser, 
+  onItemUpdated, 
+  onLogin, 
+  onAddItem 
+}: ItemDetailModalProps) {
   const [showFullImage, setShowFullImage] = useState(false);
 
   if (!item) return null;
 
   return (
     <>
-      <Dialog open={!!item && !showFullImage} onOpenChange={onClose}>
+      {/* 這裡改用主程式傳進來的 isOpen 來控制視窗開關 */}
+      <Dialog open={isOpen && !showFullImage} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto p-0">
           <Toaster />
           
           <div 
-            className="relative aspect-[16/10] w-full overflow-hidden border-b cursor-pointer"
+            className="relative aspect-[16/10] w-full overflow-hidden border-b cursor-pointer bg-muted/10"
             onClick={() => setShowFullImage(true)}
           > 
             <img src={item.image} alt={item.title} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
