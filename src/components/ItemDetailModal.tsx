@@ -30,34 +30,26 @@ interface ItemDetailModalProps {
     distance?: number;
   } | null;
   onClose: () => void;
-  onLogin: () => void;
-  onAddItem: () => void;
+  onLogin?: () => void;   // 👈 加上問號，變成選填
+  onAddItem?: () => void; // 👈 加上問號，變成選填
 }
 
 export function ItemDetailModal({ item, onClose, onLogin, onAddItem }: ItemDetailModalProps) {
-  // 控制是否顯示「全螢幕放大圖片」的狀態
   const [showFullImage, setShowFullImage] = useState(false);
 
   if (!item) return null;
 
   return (
     <>
-      {/* 1. 原本的物品詳細資訊彈窗 */}
       <Dialog open={!!item && !showFullImage} onOpenChange={onClose}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto p-0">
           <Toaster />
           
-          {/* 圖片區域：乾淨的點擊區塊，移除多餘特效 */}
           <div 
             className="relative aspect-[16/10] w-full overflow-hidden border-b cursor-pointer"
             onClick={() => setShowFullImage(true)}
           > 
-            <img
-              src={item.image}
-              alt={item.title}
-              className="w-full h-full object-cover hover:opacity-90 transition-opacity" 
-            />
-
+            <img src={item.image} alt={item.title} className="w-full h-full object-cover hover:opacity-90 transition-opacity" />
             <div className="absolute top-4 left-4 flex gap-2">
               <span className="bg-sky-100 text-sky-700 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm pointer-events-none">
                 <Package className="h-3.5 w-3.5" />
@@ -73,7 +65,6 @@ export function ItemDetailModal({ item, onClose, onLogin, onAddItem }: ItemDetai
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold tracking-tight mb-4">{item.title}</DialogTitle>
             </DialogHeader>
-
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm text-muted-foreground bg-muted/20 p-4 rounded-xl">
                 <div className="flex items-center gap-2">
@@ -93,14 +84,12 @@ export function ItemDetailModal({ item, onClose, onLogin, onAddItem }: ItemDetai
                   <span>物品主人：{item.owner.name}</span>
                 </div>
               </div>
-
               <div className="bg-muted p-4 rounded-xl text-sm">
                 <h4 className="font-semibold mb-2">物品描述</h4>
                 <p className="text-muted-foreground leading-relaxed">
                   這是一張狀況良好的桌子，非常適合居家辦公或用餐使用。歡迎信任的社群成員借用。借用前請確認可以自行搬運。
                 </p>
               </div>
-
               <div className="flex items-center gap-2 pt-2">
                 <Button size="lg" className="flex-1 gap-2 bg-sky-600 hover:bg-sky-700">
                   <MessageSquareShare className="h-5 w-5" />
@@ -112,20 +101,12 @@ export function ItemDetailModal({ item, onClose, onLogin, onAddItem }: ItemDetai
         </DialogContent>
       </Dialog>
 
-      {/* 2. 全螢幕圖片無裁切模式 */}
       <Dialog open={showFullImage} onOpenChange={setShowFullImage}>
         <DialogContent className="max-w-[95vw] w-full max-h-[95vh] h-full p-0 bg-black/95 border-none flex flex-col items-center justify-center">
-          <button 
-            onClick={() => setShowFullImage(false)} 
-            className="absolute top-4 right-4 p-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors z-50"
-          >
+          <button onClick={() => setShowFullImage(false)} className="absolute top-4 right-4 p-2 bg-white/10 text-white rounded-full hover:bg-white/20 transition-colors z-50">
             <X className="w-6 h-6" />
           </button>
-          <img 
-            src={item.image} 
-            alt={item.title} 
-            className="w-full h-full object-contain" 
-          />
+          <img src={item.image} alt={item.title} className="w-full h-full object-contain" />
         </DialogContent>
       </Dialog>
     </>
