@@ -4,34 +4,11 @@ import { Button } from './ui/button';
 import { Toaster } from './ui/sonner';
 import { MapPin, Clock3, Tag, Package, UserCircle, MessageSquareShare, X } from 'lucide-react';
 
-interface User {
-  id: string;
-  name: string;
-  avatar: string;
-  phone?: string;
-  socialBindings: {
-    facebook: boolean;
-    imessage: boolean;
-    instagram: boolean;
-  };
-}
-
 interface ItemDetailModalProps {
-  item: {
-    id: string;
-    title: string;
-    category: string;
-    condition: string;
-    availableFrom: string;
-    availableTo: string;
-    location: string;
-    image: string;
-    owner: User;
-    distance?: number;
-  } | null;
+  item: any; // 
   onClose: () => void;
-  onLogin?: () => void;   // 👈 加上問號，變成選填
-  onAddItem?: () => void; // 👈 加上問號，變成選填
+  onLogin?: () => void;
+  onAddItem?: () => void;
 }
 
 export function ItemDetailModal({ item, onClose, onLogin, onAddItem }: ItemDetailModalProps) {
