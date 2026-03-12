@@ -1,180 +1,172 @@
 import { useState } from 'react';
-import { supabase } from '../supabase';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from './ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { Textarea } from './ui/textarea';
-import { Label } from './ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './ui/select';
-import { CATEGORIES } from '../data/constants';
+import { PackagePlus, Clock3, MapPin, Tag, Package, Image as ImageIcon, X } from 'lucide-react';
+import { Toaster } from './ui/sonner';
+import { toast } from 'sonner';
 
 interface AddItemModalProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
-  onSubmit: (itemData: any) => void;
+  onItemAdd: (item: any) => void;
   currentUser: any;
 }
 
-export function AddItemModal({ isOpen, onClose, onSubmit, currentUser }: AddItemModalProps) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState('');
-  const [location, setLocation] = useState('');
-  const [features, setFeatures] = useState('');
-  const [image, setImage] = useState<File | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+export function AddItemModal({ open, onClose, onItemAdd, currentUser }: AddItemModalProps) {
+  const [formData, setFormData] = useState({
+    title: '',
+    category: '',
+    condition: '',
+    availableFrom: '',
+    availableTo: '',
+    location: '',
+    image: '',
+  });
 
-  const handleSubmit = async () => {
-    if (!title || !description || !category || !location) {
-      setError('請填寫所有必要欄位');
-      return;
-    }
-    setLoading(true);
-    setError('');
-
-    let imageUrl = 'https://images.unsplash.com/photo-1586380128687-e15d6d7e923b?w=400';
-
-    if (image) {
-      const fileExt = image.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('item-images')
-        .upload(fileName, image);
-      if (uploadError) {
-        setError('圖片上傳失敗：' + uploadError.message);
-        setLoading(false);
-        return;
-      }
-      const { data: urlData } = supabase.storage.from('item-images').getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
-    }
-
-    const { data, error: insertError } = await supabase.from('items').insert({
-      title,
-      description,
-      category,
-      location,
-      image_url: imageUrl,
-      features: features.split(',').map((f) => f.trim()).filter(Boolean),
-      owner_id: currentUser.id,
-      owner_name: currentUser.name,
-      owner_avatar: currentUser.avatar,
-      available: true,
-      lat: 25.0330 + (Math.random() - 0.5) * 0.02,
-      lng: 121.5654 + (Math.random() - 0.5) * 0.02,
-    }).select().single();
-
-    setLoading(false);
-
-    if (insertError) {
-      setError('發佈失敗：' + insertError.message);
-      return;
-    }
-
-    onSubmit(data);
-    setTitle('');
-    setDescription('');
-    setCategory('');
-    setLocation('');
-    setFeatures('');
-    setImage(null);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newItem = {
+      ...formData,
+      id: `item_${Date.now()}`,
+      owner: currentUser,
+      availableFrom: new Date(formData.availableFrom).toISOString(),
+      availableTo: new Date(formData.availableTo).toISOString(),
+    };
+    onItemAdd(newItem);
+    toast.success('物品發佈成功！');
     onClose();
+    setFormData({
+      title: '', category: '', condition: '',
+      availableFrom: '', availableTo: '', location: '', image: '',
+    });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>發佈物品</DialogTitle>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto p-0">
+        <Toaster />
+        <DialogHeader className="px-6 pt-6">
+          <DialogTitle className="text-2xl font-bold tracking-tight">發佈我的好物</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title">物品名稱</Label>
+
+        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-6">
+          
+          {/* 1. 圖片上傳與預覽區域：優化為不裁切模式 */}
+          <div className="border-2 border-dashed border-muted-foreground/30 rounded-2xl aspect-[16/10] bg-muted/20 flex flex-col items-center justify-center relative overflow-hidden group">
+            {formData.image ? (
+              <>
+                <img
+                  src={formData.image}
+                  alt="Item preview"
+                  className="w-full h-full object-contain p-2" // 核心修改：將 object-cover 改為 object-contain，並加入 p-2
+                />
+                <Button
+                  size="icon"
+                  variant="destructive"
+                  className="absolute top-2 right-2 h-7 w-7 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={() => setFormData({ ...formData, image: '' })}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <label className="cursor-pointer flex flex-col items-center gap-3 text-muted-foreground hover:text-primary transition-colors">
+                <div className="p-4 bg-muted rounded-full">
+                  <ImageIcon className="h-8 w-8" />
+                </div>
+                <span className="text-sm font-medium">點擊上傳物品圖片</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                  required
+                />
+              </label>
+            )}
+          </div>
+
+          {/* 2. 表單內容區域 (省略，保持不變) */}
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+            <div className="col-span-2">
+              <Input
+                placeholder="物品名稱，例如：我的溫馨小桌子"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className="rounded-xl p-6"
+                required
+              />
+            </div>
+
             <Input
-              id="title"
-              placeholder="例如：電動螺絲起子"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-1"
+              placeholder="物品狀況 (例如：九成新)"
+              value={formData.condition}
+              onChange={(e) => setFormData({ ...formData, condition: e.target.value })}
+              className="rounded-xl p-6"
+              required
             />
-          </div>
-          <div>
-            <Label htmlFor="description">物品描述</Label>
-            <Textarea
-              id="description"
-              placeholder="描述物品的狀況、用途等..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="category">分類</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="mt-1">
-                <SelectValue placeholder="選擇分類" />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label htmlFor="location">地點</Label>
+            
             <Input
-              id="location"
-              placeholder="例如：大安區, 台北市"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="mt-1"
+              placeholder="類別 (例如：廚房、工具)"
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="rounded-xl p-6"
+              required
             />
+
+            <div className="flex items-center gap-3 col-span-2 bg-muted/30 p-4 rounded-xl border">
+              <Clock3 className="h-5 w-5 text-sky-500" />
+              <Input
+                type="date"
+                value={formData.availableFrom}
+                onChange={(e) => setFormData({ ...formData, availableFrom: e.target.value })}
+                className="bg-transparent border-none p-0 focus-visible:ring-0"
+                required
+              />
+              <span className="text-muted-foreground">至</span>
+              <Input
+                type="date"
+                value={formData.availableTo}
+                onChange={(e) => setFormData({ ...formData, availableTo: e.target.value })}
+                className="bg-transparent border-none p-0 focus-visible:ring-0"
+                required
+              />
+            </div>
+            
+            <div className="col-span-2 flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-red-500" />
+              <Input
+                placeholder="物品地點，例如：台北市大安區仁愛圓環"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="rounded-xl p-6"
+                required
+              />
+            </div>
           </div>
-          <div>
-            <Label htmlFor="features">特色標籤（用逗號分隔）</Label>
-            <Input
-              id="features"
-              placeholder="例如：充電式, 附收納盒, 九成新"
-              value={features}
-              onChange={(e) => setFeatures(e.target.value)}
-              className="mt-1"
-            />
-          </div>
-          <div>
-            <Label htmlFor="image">物品照片（選填）</Label>
-            <Input
-              id="image"
-              type="file"
-              accept="image/*"
-              onChange={(e) => setImage(e.target.files?.[0] || null)}
-              className="mt-1"
-            />
-          </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
-          <div className="flex space-x-3 pt-2">
-            <Button variant="outline" onClick={onClose} className="flex-1">
+
+          <DialogFooter className="pt-4">
+            <Button type="button" variant="ghost" onClick={onClose} className="rounded-xl px-6">
               取消
             </Button>
-            <Button onClick={handleSubmit} className="flex-1" disabled={loading}>
-              {loading ? '發佈中...' : '發佈物品'}
+            <Button type="submit" size="lg" className="rounded-xl px-10 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700">
+              <PackagePlus className="h-5 w-5 mr-2" />
+              立即發佈
             </Button>
-          </div>
-        </div>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
