@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Search, Bell, MapPin, PackagePlus, UserCircle, LogOut } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
