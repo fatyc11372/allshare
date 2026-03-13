@@ -53,18 +53,18 @@ export function ItemDetailModal({
   return (
     <>
       <Dialog open={isOpen && !showFullImage} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto p-0">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] p-0 bg-background rounded-3xl overflow-hidden flex flex-col">
           <Toaster />
           
-          {/* 圖片區域 */}
+          {/* 核心修正 1：圖片區域設置限制高度 (例如 max-h-[45vh])，並保留不裁切模式 */}
           <div 
-            className="relative aspect-[16/10] w-full overflow-hidden border-b cursor-pointer bg-muted/10 flex items-center justify-center group"
+            className="w-full max-h-[45vh] bg-muted/30 overflow-hidden border-b cursor-pointer flex items-center justify-center shrink-0 group relative"
             onClick={() => {
               if (imageSrc) setShowFullImage(true);
             }}
           > 
             {imageSrc ? (
-              <img src={imageSrc} alt={item.title} className="w-full h-full object-contain hover:opacity-90 transition-opacity" />
+              <img src={imageSrc} alt={item.title} className="w-full h-full object-contain p-2 hover:opacity-90 transition-opacity" />
             ) : (
               <div className="flex flex-col items-center text-muted-foreground">
                 <ImageIcon className="h-12 w-12 mb-2 opacity-20" />
@@ -85,7 +85,8 @@ export function ItemDetailModal({
             </div>
           </div>
 
-          <div className="px-6 py-5">
+          {/* 核心修正 2：資訊區域設置 flex-1 px-6 py-5 overflow-y-auto，將其變成獨立的可滾動區域 */}
+          <div className="flex-1 px-6 py-5 overflow-y-auto bg-background">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold tracking-tight mb-4">{item.title}</DialogTitle>
             </DialogHeader>
