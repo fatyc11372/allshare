@@ -15,7 +15,7 @@ interface AddItemModalProps {
 
 export function AddItemModal({ isOpen, onClose, onSubmit, currentUser }: AddItemModalProps) {
   const [formData, setFormData] = useState({
-    title: '', category: '', condition: '',
+    title: '', category: '', condition: '', description: '',
     availableFrom: '', availableTo: '', location: '', image: '',
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -45,6 +45,7 @@ export function AddItemModal({ isOpen, onClose, onSubmit, currentUser }: AddItem
         title: formData.title,
         category: formData.category,
         condition: formData.condition,
+        description: formData.description,
         location: formData.location,
         image_url: imageUrl,
         owner_id: currentUser.id,
@@ -58,7 +59,7 @@ export function AddItemModal({ isOpen, onClose, onSubmit, currentUser }: AddItem
       toast.success('物品發佈成功！');
       onSubmit(data);
       onClose();
-      setFormData({ title: '', category: '', condition: '', availableFrom: '', availableTo: '', location: '', image: '' });
+      setFormData({ title: '', category: '', condition: '', description: '', availableFrom: '', availableTo: '', location: '', image: '' });
       setImageFile(null);
     } catch (err: any) {
       toast.error('發佈失敗：' + err.message);
@@ -110,6 +111,9 @@ export function AddItemModal({ isOpen, onClose, onSubmit, currentUser }: AddItem
             <div className="col-span-2">
               <Input placeholder="物品名稱，例如：我的溫馨小桌子" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} className="rounded-xl p-6" required />
             </div>
+            <div className="col-span-2">
+  <Input placeholder="物品描述，例如：九成新，附配件" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="rounded-xl p-6" required />
+</div>
             <Input placeholder="物品狀況 (例如：九成新)" value={formData.condition} onChange={(e) => setFormData({ ...formData, condition: e.target.value })} className="rounded-xl p-6" required />
             <Input placeholder="類別 (例如：廚房、工具)" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="rounded-xl p-6" required />
             <div className="col-span-2 flex items-center gap-2">
