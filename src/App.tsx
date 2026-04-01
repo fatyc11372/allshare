@@ -45,7 +45,7 @@ function dbItemToItem(row: any): Item {
       id: row.owner_id,
       name: row.owner_name || '用戶',
       avatar: row.owner_avatar || '',
-      rating: 5.0,
+      rating: (row.borrow_requests || []).filter((r: any) => r.status === 'approved').length,
       reviewCount: 0,
     },
     location: row.location,
@@ -94,7 +94,7 @@ export default function App() {
     setLoading(true);
     const { data, error } = await supabase
       .from('items')
-      .select('*')
+      .select('*, borrow_requests(id, status)')
       .order('created_at', { ascending: false });
     setLoading(false);
     if (error) {
